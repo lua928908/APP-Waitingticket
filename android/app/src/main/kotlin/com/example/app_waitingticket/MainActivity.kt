@@ -13,9 +13,14 @@ class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        // PrinterHelper 인스턴스 생성 및 프린터 열기
-        printerHelper = PrinterHelper()
-        printerHelper.openPrinter() // 앱 실행 시 프린터 열기
+        try {
+            // PrinterHelper 인스턴스 생성 및 프린터 열기
+            printerHelper = PrinterHelper()
+            val openResult = printerHelper.openPrinter() // 앱 실행 시 프린터 열기
+            println("Printer open result: $openResult")
+        } catch (e: Exception) {
+            println("Error initializing printer: ${e.message}")
+        }
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
                 call, result ->
@@ -23,15 +28,23 @@ class MainActivity: FlutterActivity() {
                 "printText" -> {
                     val text = call.argument<String>("text")
                     if (text != null) {
-                        val printResult = printerHelper.printText(text)
-                        result.success(printResult)
+                        try {
+                            val printResult = printerHelper.printText(text)
+                            result.success(printResult)
+                        } catch (e: Exception) {
+                            result.error("PRINT_ERROR", "Print failed: ${e.message}", null)
+                        }
                     } else {
                         result.error("INVALID_ARGUMENT", "Text to print is null.", null)
                     }
                 }
                 "openCashDrawer" -> {
-                    val cashDrawerResult = printerHelper.openCashDrawer()
-                    result.success(cashDrawerResult)
+                    try {
+                        val cashDrawerResult = printerHelper.openCashDrawer()
+                        result.success(cashDrawerResult)
+                    } catch (e: Exception) {
+                        result.error("CASH_DRAWER_ERROR", "Cash drawer failed: ${e.message}", null)
+                    }
                 }
                 else -> {
                     result.notImplemented()

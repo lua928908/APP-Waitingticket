@@ -16,13 +16,19 @@ public class PrinterHelper {
         if (isPrinterOpen) {
             return "Printer is already open.";
         }
-        // [수정] jyNativeClass.java에 정의된 실제 함수 이름으로 변경
-        int result = nativec.jyPrinterOpen();
-        if (result == 0) {
-            isPrinterOpen = true;
-            return "Printer opened successfully.";
-        } else {
-            return "Failed to open printer. Error code: " + result;
+        try {
+            // [수정] jyNativeClass.java에 정의된 실제 함수 이름으로 변경
+            int result = nativec.jyPrinterOpen();
+            if (result == 0) {
+                isPrinterOpen = true;
+                return "Printer opened successfully.";
+            } else {
+                return "Failed to open printer. Error code: " + result;
+            }
+        } catch (UnsatisfiedLinkError e) {
+            return "Native library not loaded: " + e.getMessage();
+        } catch (Exception e) {
+            return "Exception while opening printer: " + e.getMessage();
         }
     }
 
@@ -46,6 +52,8 @@ public class PrinterHelper {
             // [수정] jyNativeClass.java에 정의된 실제 함수 이름으로 변경
             int result = nativec.jyPrintString(textBytes, textBytes.length);
             return "Print command sent. Result: " + result;
+        } catch (UnsatisfiedLinkError e) {
+            return "Native library not loaded: " + e.getMessage();
         } catch (Exception e) {
             return "Failed to print text: " + e.getMessage();
         }

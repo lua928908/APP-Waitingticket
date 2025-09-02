@@ -45,6 +45,9 @@ class _WebViewPageState extends State<WebViewPage> {
       DeviceOrientation.landscapeLeft,
     ]);
 
+    // 프린터 서비스 초기화 확인
+    _checkPrinterStatus();
+
     String serverUrl = 'http://192.168.0.113:8080/pos/app-waiting/appWaitingTicketMain';
     print('서버 URL: $serverUrl');
 
@@ -76,6 +79,15 @@ class _WebViewPageState extends State<WebViewPage> {
         },
       )
       ..loadRequest(Uri.parse(serverUrl));
+  }
+
+  // 프린터 상태 확인 메서드
+  void _checkPrinterStatus() {
+    _printerService.printText("프린터 테스트").then((_) {
+      print('프린터 서비스 초기화 성공');
+    }).catchError((error) {
+      print('프린터 서비스 초기화 실패: $error');
+    });
   }
 
   @override
