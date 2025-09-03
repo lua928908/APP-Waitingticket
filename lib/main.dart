@@ -74,7 +74,13 @@ class _WebViewPageState extends State<WebViewPage> {
         onMessageReceived: (JavaScriptMessage message) {
           // 웹뷰로부터 메시지를 받으면 프린터 서비스의 printText 함수를 호출합니다.
           print('웹뷰로부터 프린트 요청 받음: ${message.message}');
-          _printerService.printText(message.message);
+          
+          // 메시지가 비어있지 않은지 확인
+          if (message.message.isNotEmpty) {
+            _printerService.printText(message.message);
+          } else {
+            print('빈 메시지가 전달되었습니다.');
+          }
         },
       )
       ..loadRequest(Uri.parse(serverUrl));
