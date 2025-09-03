@@ -8,7 +8,7 @@ class PrinterService {
   // 프린터 상태 확인
   Future<String> checkPrinterStatus() async {
     try {
-      final int? check = await _platform.invokeMethod('checkPrinterStatus');
+      final int? check = await _platform.invokeMethod('printerStatus');
       final String result = check == 0 ? "ok" : "fair";
 
       print('프린터 상태 확인 결과: $result');
@@ -29,6 +29,7 @@ class PrinterService {
       print('프린터 서비스: 현재 프린터 상태: $status');
       
       // 'printText' 메소드를 호출하고, 인쇄할 텍스트를 Map 형태로 전달합니다.
+      printText('invokeMethod 직전@');
       final String? result = await _platform.invokeMethod('printText', {'text': text});
       print('네이티브 프린트 결과: $result');
 

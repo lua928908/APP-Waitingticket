@@ -91,7 +91,7 @@ public class PrinterHelper {
 
     // 프린터 상태 확인
     public int printerStatus(){
-
+        System.out.println("PrinterHelper > printerStatus 메서드 실행@@");
         jyNativeClass nativec = new jyNativeClass();
         int overheatCheck=0;
         int coverCheck = 0;
@@ -167,6 +167,8 @@ public class PrinterHelper {
 
     // 텍스트 인쇄 (간단한 버전)
     public String printText(String text) {
+        System.out.println("PrinterHelper > printText 메서드 실행@");
+        System.out.println("nativec = " + nativec);
         if (nativec == null) {
             return "Native class is not initialized.";
         }

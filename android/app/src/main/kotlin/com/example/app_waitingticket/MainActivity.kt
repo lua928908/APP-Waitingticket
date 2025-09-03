@@ -62,6 +62,18 @@ class MainActivity: FlutterActivity() {
                         result.error("INVALID_ARGUMENT", "Text to print is null.", null)
                     }
                 }
+                "printerStatus" -> {
+                    // 2. try-catch로 네이티브 오류 발생 시 앱 중단을 방지
+                    try {
+                        val status = printerHelper.printerStatus()
+                        println("MainActivity: Checking printer status: $status")
+                        // 3. 순수한 상태 결과("OK", "paper no exist" 등)만 전달
+                        result.success(status)
+                    } catch (e: Exception) {
+                        println("MainActivity: Error checking printer status: ${e.message}")
+                        result.error("STATUS_CHECK_FAILED", "Failed to check printer status.", e.message)
+                    }
+                }
             }
         }
         println("MainActivity: Method channel setup completed")
