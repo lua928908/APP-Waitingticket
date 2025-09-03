@@ -1,7 +1,5 @@
 package printer;
 
-
-import printer.jyNativeClass;
 import java.io.UnsupportedEncodingException;
 import android.app.AlertDialog;
 import android.app.AlertDialog;
@@ -53,14 +51,31 @@ public class PrinterHelper {
     int printsync = 1;
     int status=0;
     public PrinterHelper() {
+        System.out.println("PrinterHelper: Constructor called.");
+        System.out.println("PrinterHelper: Thread: " + Thread.currentThread().getName());
         try {
-            System.out.println("PrinterHelper: Constructor called");
-            // .so 라이브러리 로딩은 jyNativeClass의 static 블록에서 자동으로 처리됩니다.
-            nativec = new jyNativeClass();
-            System.out.println("PrinterHelper: jyNativeClass instance created successfully");
-        } catch (Exception e) {
-            System.out.println("PrinterHelper: Error creating jyNativeClass instance: " + e.getMessage());
+            // 명시적으로 jyNativeClass 클래스를 로드하여 static 블록이 실행되도록 함
+            System.out.println("PrinterHelper: Loading jyNativeClass class...");
+            Class.forName("printer.jyNativeClass");
+            System.out.println("PrinterHelper: jyNativeClass class loaded successfully");
+            
+            // 생성자에서 단 한번만 jyNativeClass 인스턴스를 생성합니다.
+            // 이 시점에 jyNativeClass의 static 블록이 실행되어야 합니다.
+            this.nativec = new jyNativeClass();
+            System.out.println("PrinterHelper: jyNativeClass instance created successfully.");
+        } catch (ClassNotFoundException e) {
+            System.err.println("PrinterHelper CRITICAL: jyNativeClass class not found!");
             e.printStackTrace();
+            throw new RuntimeException(e);
+        } catch (UnsatisfiedLinkError e) {
+            System.err.println("PrinterHelper CRITICAL: Failed to link native library. Check .so file.");
+            e.printStackTrace();
+            // 오류를 던져서 상위 호출자(MainActivity)가 알 수 있도록 합니다.
+            throw e;
+        } catch (Exception e) {
+            System.err.println("PrinterHelper CRITICAL: An unexpected error occurred during initialization.");
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -92,10 +107,18 @@ public class PrinterHelper {
     // 프린터 상태 확인
     public int printerStatus(){
         System.out.println("PrinterHelper > printerStatus 메서드 실행@@");
-        jyNativeClass nativec = new jyNativeClass();
+
+        // nativec가 null인지 확인
+        if (nativec == null) {
+            System.out.println("PrinterHelper > printerStatus: nativec is null!");
+            return -1;
+        }
+
+        System.out.println("PrinterHelper > printerStatus: nativec is not null, proceeding...");
+
         int overheatCheck=0;
         int coverCheck = 0;
-        int paperCheck = nativec.jyPrinter_PaperCheck();
+        int paperCheck = nativec.jyPrinter_PaperCheck(); // this.nativec 사용
 
         if (paperCheck == -2) {
 
@@ -172,13 +195,17 @@ public class PrinterHelper {
         if (nativec == null) {
             return "Native class is not initialized.";
         }
-        
+
         try {
             System.out.println("PrinterHelper: Printing text: " + text);
             // 한글 포스기는 보통 EUC-KR 인코딩을 사용합니다.
             byte[] textBytes = text.getBytes("EUC-KR");
             int result = nativec.jyPrintString(textBytes, textBytes.length);
             System.out.println("PrinterHelper: Print result: " + result);
+
+            // 실제 프린트 호출되는 메서드
+            printTest();
+
             return "Print command sent. Result: " + result;
         } catch (UnsupportedEncodingException e) {
             System.out.println("PrinterHelper: Encoding error: " + e.getMessage());

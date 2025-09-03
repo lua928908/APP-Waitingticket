@@ -7,6 +7,10 @@ import 'printer_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Flutter 엔진이 완전히 초기화될 때까지 대기
+  print('Flutter 엔진 초기화 시작...');
+  
   // 앱 전체화면 모드
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   // 화면 방향을 가로로 고정
@@ -14,6 +18,8 @@ void main() {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
+  
+  print('Flutter 앱 실행 시작...');
   runApp(const MyApp());
 }
 
