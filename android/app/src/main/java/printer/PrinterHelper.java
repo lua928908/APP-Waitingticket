@@ -83,8 +83,9 @@ public class PrinterHelper {
     public String openPrinter() {
         try {
             System.out.println("PrinterHelper: openPrinter() called");
-            jyNativeClass nativec = new jyNativeClass();
-            int OpenCheck = nativec.jyPrinterOpen();
+            // jyNativeClass nativec = new jyNativeClass();
+            // int OpenCheck = nativec.jyPrinterOpen();
+            int OpenCheck = this.nativec.jyPrinterOpen(); // this.nativec 사용
 
             System.out.println("openPrinter > OpenCheck = " + OpenCheck);
 
