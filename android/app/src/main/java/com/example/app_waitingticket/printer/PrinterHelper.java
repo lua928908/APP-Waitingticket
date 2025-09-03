@@ -2,7 +2,6 @@ package printer;
 
 import java.io.UnsupportedEncodingException;
 import android.app.AlertDialog;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,6 +23,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.thirteenrain.jyndklib.*;
 
 public class PrinterHelper {
 

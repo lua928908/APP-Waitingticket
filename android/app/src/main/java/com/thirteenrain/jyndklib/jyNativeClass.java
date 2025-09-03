@@ -1,6 +1,4 @@
-package printer;
-
-//import java.io.FileDescriptor;
+package com.thirteenrain.jyndklib;
 
 import java.io.FileDescriptor;
 
