@@ -17,7 +17,7 @@ class PrinterService {
     }
   }
 
-  // (추가) 금전함(Cash Drawer) 열기 함수 예시
+  // 금전함(Cash Drawer) 열기 함수 예시
   Future<void> openCashDrawer() async {
     try {
       final String? result = await _platform.invokeMethod('openCashDrawer');
@@ -27,3 +27,4 @@ class PrinterService {
     }
   }
 }
+

@@ -6,8 +6,18 @@ import java.io.FileDescriptor;
 
 public class jyNativeClass {
     static {
-        System.loadLibrary("jyndklib");							//apk install
-        //System.load("/system/lib/libjyndklib.so");		//system app
+        try {
+            System.out.println("jyNativeClass: Loading native library 'jyndklib'");
+            System.loadLibrary("jyndklib");							//apk install
+            System.out.println("jyNativeClass: Native library 'jyndklib' loaded successfully");
+            //System.load("/system/lib/libjyndklib.so");		//system app
+        } catch (UnsatisfiedLinkError e) {
+            System.out.println("jyNativeClass: Failed to load native library 'jyndklib': " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println("jyNativeClass: Exception while loading native library: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public native int jyUart_WriteByte(int hDevice,String bByte);

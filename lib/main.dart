@@ -7,7 +7,9 @@ import 'printer_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // 앱 전체화면 모드
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  // 화면 방향을 가로로 고정
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
@@ -36,17 +38,11 @@ class _WebViewPageState extends State<WebViewPage> {
   late final WebViewController _controller;
   // 2. PrinterService 인스턴스를 생성합니다.
   final PrinterService _printerService = PrinterService();
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-    ]);
-
-    // 프린터 서비스 초기화 확인
-    _checkPrinterStatus();
 
     String serverUrl = 'http://192.168.0.113:8080/pos/app-waiting/appWaitingTicketMain';
     print('서버 URL: $serverUrl');
@@ -58,12 +54,15 @@ class _WebViewPageState extends State<WebViewPage> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (String url) {
+            setState(() => _isLoading = true);
             print('페이지 로딩 시작: $url');
           },
           onPageFinished: (String url) {
+            setState(() => _isLoading = false);
             print('페이지 로딩 완료: $url');
           },
           onWebResourceError: (WebResourceError error) {
+            setState(() => _isLoading = false);
             print('웹뷰 오류: ${error.description}');
           },
         ),
@@ -81,21 +80,18 @@ class _WebViewPageState extends State<WebViewPage> {
       ..loadRequest(Uri.parse(serverUrl));
   }
 
-  // 프린터 상태 확인 메서드
-  void _checkPrinterStatus() {
-    _printerService.printText("프린터 테스트").then((_) {
-      print('프린터 서비스 초기화 성공');
-    }).catchError((error) {
-      print('프린터 서비스 초기화 실패: $error');
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
           WebViewWidget(controller: _controller),
+
+          // 로딩 인디케이터
+          if (_isLoading)
+            const Center(child: CircularProgressIndicator()),
+
+          // 새로고침 버튼 (우상단에 위치)
           Positioned(
             top: 50,
             right: 20,
@@ -105,10 +101,7 @@ class _WebViewPageState extends State<WebViewPage> {
                 print('페이지 새로고침 실행');
               },
               backgroundColor: Colors.blue,
-              child: const Icon(
-                Icons.refresh,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.refresh, color: Colors.white),
             ),
           ),
         ],
@@ -131,3 +124,4 @@ class _WebViewPageState extends State<WebViewPage> {
     super.dispose();
   }
 }
+
