@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  plugin_platform_interface: ^2.0.0
   cupertino_icons: ^1.0.8
   webview_flutter: ^4.13.0
   webview_flutter_wkwebview:
@@ -25,6 +26,11 @@ flutter:
   assets:
     - assets/icon/icon_logo.png
     - assets/config/
+  plugin:
+    platforms:
+      android:
+        package: com.thirteenrain.jy_printer
+        pluginClass: JyPrinterPlugin
 
 flutter_icons:
   android: true

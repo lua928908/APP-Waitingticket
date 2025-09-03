@@ -2,23 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-// 1. 프린터 서비스 파일을 import 합니다.
-import 'printer_service.dart';
+import 'jy_printer.dart'; // 프린터 플러그인 import
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Flutter 엔진이 완전히 초기화될 때까지 대기
+
   print('Flutter 엔진 초기화 시작...');
-  
-  // 앱 전체화면 모드
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  // 화면 방향을 가로로 고정
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
-  
+
   print('Flutter 앱 실행 시작...');
   runApp(const MyApp());
 }
@@ -42,8 +38,6 @@ class WebViewPage extends StatefulWidget {
 
 class _WebViewPageState extends State<WebViewPage> {
   late final WebViewController _controller;
-  // 2. PrinterService 인스턴스를 생성합니다.
-  final PrinterService _printerService = PrinterService();
   bool _isLoading = true;
 
   @override
@@ -73,23 +67,55 @@ class _WebViewPageState extends State<WebViewPage> {
           },
         ),
       )
-    // 3. 웹뷰와 플러터가 통신할 수 있는 채널(다리)을 추가합니다.
-    // 웹사이트의 자바스크립트에서는 'PrintHandler'라는 이름으로 플러터에 메시지를 보낼 수 있습니다.
       ..addJavaScriptChannel(
         'PrintHandler',
         onMessageReceived: (JavaScriptMessage message) {
-          // 웹뷰로부터 메시지를 받으면 프린터 서비스의 printText 함수를 호출합니다.
           print('웹뷰로부터 프린트 요청 받음: ${message.message}');
-          
-          // 메시지가 비어있지 않은지 확인
+
           if (message.message.isNotEmpty) {
-            _printerService.printText(message.message);
+            _handlePrintRequest(message.message);
           } else {
             print('빈 메시지가 전달되었습니다.');
           }
         },
       )
       ..loadRequest(Uri.parse(serverUrl));
+  }
+
+  // 프린터 요청 처리 함수
+  Future<void> _handlePrintRequest(String message) async {
+    try {
+      print('프린터 요청 처리 시작: $message');
+
+      // 프린터 열기
+      final isOpen = await JyPrinter.openPrinter();
+      if (!isOpen) {
+        print('프린터 열기 실패');
+        return;
+      }
+
+      // 프린터 상태 확인
+      final isReady = await JyPrinter.isPrinterReady();
+      if (!isReady) {
+        print('프린터가 준비되지 않았습니다');
+        await JyPrinter.closePrinter();
+        return;
+      }
+
+      // 테스트 출력
+      await JyPrinter.printText('=== 웹뷰 프린트 테스트 ===\n');
+      await JyPrinter.printText('받은 메시지: $message\n');
+      await JyPrinter.printText('시간: ${DateTime.now()}\n');
+      await JyPrinter.printText('=====================\n\n');
+
+      // 프린터 닫기
+      await JyPrinter.closePrinter();
+
+      print('프린터 출력 완료');
+
+    } catch (e) {
+      print('프린터 오류: $e');
+    }
   }
 
   @override
@@ -99,11 +125,9 @@ class _WebViewPageState extends State<WebViewPage> {
         children: [
           WebViewWidget(controller: _controller),
 
-          // 로딩 인디케이터
           if (_isLoading)
             const Center(child: CircularProgressIndicator()),
 
-          // 새로고침 버튼 (우상단에 위치)
           Positioned(
             top: 50,
             right: 20,
@@ -136,4 +160,3 @@ class _WebViewPageState extends State<WebViewPage> {
     super.dispose();
   }
 }
-

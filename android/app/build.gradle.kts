@@ -9,36 +9,32 @@ android {
     namespace = "com.example.app_waitingticket"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
-    
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
         isCoreLibraryDesugaringEnabled = true
     }
-    
+
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_21.toString()
     }
-    
+
     defaultConfig {
         applicationId = "com.example.app_waitingticket"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = 1
         versionName = "1.0"
-
-        // 앱이 사용할 CPU 라이브러리 종류를 32비트용으로 강제합니다.
-//        ndk {
-//            abiFilters.addAll(listOf("armeabi-v7a", "x86"))
-//        }
     }
-    
+
     packaging {
         jniLibs {
             useLegacyPackaging = true
+            pickFirsts.addAll(listOf("**/libjyndklib.so"))
         }
     }
-    
+
     // sourceSets 블록을 올바른 Kotlin 문법으로 수정합니다.
     sourceSets {
         getByName("main") {
@@ -51,9 +47,17 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+        debug {
+            isDebuggable = true
+            isJniDebuggable = true
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
-    
+
     // 빌드 과정에서 더 자세한 로그 출력
     buildFeatures {
         buildConfig = true
@@ -67,4 +71,3 @@ dependencies {
 flutter {
     source = "../.."
 }
-
