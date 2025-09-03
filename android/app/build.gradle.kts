@@ -37,12 +37,15 @@ android {
 
     // sourceSets 블록을 올바른 Kotlin 문법으로 수정합니다.
     sourceSets {
-        getByName("main") {
-            java.srcDirs("src/main/java")
-            kotlin.srcDirs("src/main/kotlin")
-            jniLibs.srcDir("src/main/jniLibs")
-        }
+        getByName("main").java.srcDirs("src/main/java")
     }
+
+//    sourceSets {
+//        getByName("main") {
+//            java.srcDirs("src/main/java")
+//            kotlin.srcDirs("src/main/kotlin")
+//            jniLibs.srcDir("src/main/jniLibs")
+//        }
 
     buildTypes {
         release {

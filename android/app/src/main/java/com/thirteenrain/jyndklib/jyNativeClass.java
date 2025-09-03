@@ -1,4 +1,4 @@
-package com.thirteenrain.jyndklib;
+package android.app.src.main.java.com.thirteenrain.jyndklib;
 
 //import java.io.FileDescriptor;
 
