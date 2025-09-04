@@ -220,7 +220,7 @@ public class PrinterHelper {
 
     public String printTest(String text){
         try{
-            System.out.println("printTest 메서드 실행");
+            System.out.println("printTest 메서드 실행@@@@@@@@@@@");
             // jyprt jpc = new jyprt();
             // jyNativeClass nativec = new jyNativeClass();
             String cmd = "";
@@ -256,6 +256,7 @@ public class PrinterHelper {
             // 7. 출력 실행
             try {
                 System.out.println("실제 프린터 출력 실행@");
+                System.out.println("cmd = "+ cmd);
                 this.nativec.jyPrintString(this.jpc.Esc_Initialize().getBytes("euc-kr"), printsync);
                 this.nativec.jyPrintString(cmd.getBytes("euc-kr"), printsync);
             } catch (UnsupportedEncodingException e) {

@@ -48,12 +48,14 @@ class MainActivity: FlutterActivity() {
                     "printText" -> {
                         val text = call.argument<String>("text")
                         if (text != null) {
-                            val printResult = printerHelper?.printText(text) ?: "PrinterHelper not initialized"
+                            val printResult =
+                                printerHelper?.printText(text) ?: "PrinterHelper not initialized"
                             result.success(printResult)
                         } else {
                             result.error("INVALID_ARGUMENT", "Text to print is null.", null)
                         }
                     }
+
                     "printerStatus" -> {
                         try {
                             val status = printerHelper?.printerStatus() ?: -1
@@ -61,7 +63,31 @@ class MainActivity: FlutterActivity() {
                             result.success(status)
                         } catch (e: Exception) {
                             println("MainActivity: Error checking printer status: ${e.message}")
-                            result.error("STATUS_CHECK_FAILED", "Failed to check printer status.", e.message)
+                            result.error(
+                                "STATUS_CHECK_FAILED",
+                                "Failed to check printer status.",
+                                e.message
+                            )
+                        }
+                    }
+
+                    "printTest" -> {
+                        try {
+                            val text = call.argument<String>("text")
+                            if (text != null) {
+                                val printResult =
+                                    printerHelper?.printTest(text) ?: "PrinterHelper not initialized"
+                                result.success(printResult)
+                            } else {
+                                result.error("INVALID_ARGUMENT", "Text to print is null.", null)
+                            }
+                        } catch (e: Exception) {
+                            println("MainActivity: Error checking printer status: ${e.message}")
+                            result.error(
+                                "STATUS_CHECK_FAILED",
+                                "Failed to check printer status.",
+                                e.message
+                            )
                         }
                     }
                 }
@@ -92,7 +118,8 @@ class MainActivity: FlutterActivity() {
 
     // [추가] 외부 개발사 코드에 있던 저장소 권한 확인 메서드
     fun verifyStoragePermissions(activity: FlutterActivity) {
-        val permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        val permission =
+            ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
         if (permission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                 activity,
