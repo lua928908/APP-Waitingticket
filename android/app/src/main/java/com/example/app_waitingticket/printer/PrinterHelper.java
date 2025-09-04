@@ -205,7 +205,7 @@ public class PrinterHelper {
             System.out.println("PrinterHelper: Print result: " + result);
 
             // 실제 프린트 호출되는 메서드
-            printTest();
+            // printTest(text);
 
             return "Print command sent. Result: " + result;
         } catch (UnsupportedEncodingException e) {
@@ -217,47 +217,54 @@ public class PrinterHelper {
         }
     }
 
-    public void printTest(){
-        System.out.println("printTest 메서드 실행");
-        jyprt jpc = new jyprt();
-        jyNativeClass nativec = new jyNativeClass();
-        String cmd = "";
+    public String printTest(String text){
+        try{
+            System.out.println("printTest 메서드 실행");
+            jyprt jpc = new jyprt();
+            jyNativeClass nativec = new jyNativeClass();
+            String cmd = "";
 
-        // 1. 프린터 초기화
-        cmd += jpc.Esc_Initialize();
+            // 1. 프린터 초기화
+            cmd += jpc.Esc_Initialize();
 
-        // 2. 밝기 설정
-        cmd += jpc.FS_Print_Bright((char)intBright);
+            // 2. 밝기 설정
+            cmd += jpc.FS_Print_Bright((char)intBright);
 
-        // 3. 문자 크기 설정 및 텍스트 출력
-        cmd += jpc.GS_SelectCharaterSize((char)0x11); // 48*48 크기
-        cmd += "   <제이와이컴퍼니>\n";
+            // 3. 문자 크기 설정 및 텍스트 출력
+            cmd += jpc.GS_SelectCharaterSize((char)0x11); // 48*48 크기
+            cmd += "   <제이와이컴퍼니>\n";
 
-        cmd += jpc.GS_SelectCharaterSize((char)0x0); // 12*24 크기
-        cmd += "1234567890 가나다라마바사아자차카타파하 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz\n";
+            cmd += jpc.GS_SelectCharaterSize((char)0x0); // 12*24 크기
+            cmd += "1234567890 가나다라마바사아자차카타파하 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz\n";
 
-        // 4. 밑줄 효과
-        cmd += jpc.Esc_Underline((char)0x1); // 밑줄 on
-        cmd += "텍스트 내용";
-        cmd += jpc.Esc_Underline((char)0x0); // 밑줄 off
+            // 4. 밑줄 효과
+            cmd += jpc.Esc_Underline((char)0x1); // 밑줄 on
+            cmd += "텍스트 내용";
+            cmd += jpc.Esc_Underline((char)0x0); // 밑줄 off
 
-        // 5. 반전 효과
-        cmd += jpc.GS_TurnsWhiteBlack((char)1); // 반전 on
-        cmd += "반전 텍스트";
-        cmd += jpc.GS_TurnsWhiteBlack((char)0); // 반전 off
+            // 5. 반전 효과
+            cmd += jpc.GS_TurnsWhiteBlack((char)1); // 반전 on
+            cmd += "반전 텍스트";
+            cmd += jpc.GS_TurnsWhiteBlack((char)0); // 반전 off
 
-        // 6. 용지 이송 및 절단
-        cmd += "\n\n\n\n";
-        cmd += jpc.Control_FormFeed();
-        cmd += jpc.GS_CutPaper((char)0);
+            // 6. 용지 이송 및 절단
+            cmd += "\n\n\n\n";
+            cmd += jpc.Control_FormFeed();
+            cmd += jpc.GS_CutPaper((char)0);
 
-        // 7. 출력 실행
-        try {
-            System.out.println("프린터 출력 실행@");
-            nativec.jyPrintString(jpc.Esc_Initialize().getBytes("euc-kr"), printsync);
-            nativec.jyPrintString(cmd.getBytes("euc-kr"), printsync);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            // 7. 출력 실행
+            try {
+                System.out.println("프린터 출력 실행@");
+                nativec.jyPrintString(jpc.Esc_Initialize().getBytes("euc-kr"), printsync);
+                nativec.jyPrintString(cmd.getBytes("euc-kr"), printsync);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            return "Print Success";
+        }catch(Error error){
+            error.printStackTrace();
+            // throw new RuntimeException(error);
+            return "Print Failure";
         }
     }
 
