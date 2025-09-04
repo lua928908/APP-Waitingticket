@@ -25,21 +25,27 @@ class PrinterService {
   Future<void> printText(String text) async {
     try {
       print('프린터 서비스: 인쇄 요청 시작 - 텍스트 길이: ${text.length}');
+      print('프린터 서비스: 전달할 텍스트: $text');
       
       // 먼저 프린터 상태 확인
       final status = await checkPrinterStatus();
       print('프린터 서비스: 현재 프린터 상태: $status');
       
+      if (status != "ok") {
+        print('프린터 서비스: 프린터 상태가 좋지 않음 - $status');
+        return;
+      }
+      
       // 'printText' 메소드를 호출하고, 인쇄할 텍스트를 Map 형태로 전달합니다.
-      print('invokeMethod 직전@'); // 수정: printText() 호출 제거
-      // MainActivity.kt -> printText 호출
-      // final String? result = await _platform.invokeMethod('printText', {'text': text});
-      final String? result = await _platform.invokeMethod('printTest', {'text': text});
-      print('네이티브 프린트 최종 결과: $result');
+      print('프린터 서비스: invokeMethod 호출 직전');
+      final String? result = await _platform.invokeMethod('printText', {'text': text});
+      print('프린터 서비스: 네이티브 프린트 최종 결과: $result');
 
     } on PlatformException catch (e) {
       // 네이티브 코드 호출 중 에러가 발생하면 여기서 처리합니다.
-      print("프린트 실패: '${e.message}'.");
+      print("프린터 서비스: 프린트 실패 - '${e.message}'.");
+      print("프린터 서비스: 에러 코드: ${e.code}");
+      print("프린터 서비스: 에러 상세: ${e.details}");
     }
   }
 }
