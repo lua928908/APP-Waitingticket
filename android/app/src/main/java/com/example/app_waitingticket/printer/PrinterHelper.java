@@ -56,7 +56,7 @@ public class PrinterHelper {
         try {
             // 명시적으로 jyNativeClass 클래스를 로드하여 static 블록이 실행되도록 함
             System.out.println("PrinterHelper: Loading jyNativeClass class...");
-            Class.forName("printer.jyNativeClass");
+            Class.forName("com.thirteenrain.jyndklib.jyNativeClass");
             System.out.println("PrinterHelper: jyNativeClass class loaded successfully");
             
             // 생성자에서 단 한번만 jyNativeClass 인스턴스를 생성합니다.
@@ -218,6 +218,7 @@ public class PrinterHelper {
     }
 
     public void printTest(){
+        System.out.println("printTest 메서드 실행");
         jyprt jpc = new jyprt();
         jyNativeClass nativec = new jyNativeClass();
         String cmd = "";
@@ -252,6 +253,7 @@ public class PrinterHelper {
 
         // 7. 출력 실행
         try {
+            System.out.println("프린터 출력 실행@");
             nativec.jyPrintString(jpc.Esc_Initialize().getBytes("euc-kr"), printsync);
             nativec.jyPrintString(cmd.getBytes("euc-kr"), printsync);
         } catch (UnsupportedEncodingException e) {

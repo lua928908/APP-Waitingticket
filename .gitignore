@@ -32,6 +32,7 @@ app_waitingticket/.idea/
 .pub/
 /build/
 /coverage/
+.idea/
 
 # Symbolication related
 app.*.symbols
