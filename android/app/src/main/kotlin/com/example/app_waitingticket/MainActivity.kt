@@ -1,88 +1,85 @@
 package com.example.app_waitingticket
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Bundle
 import androidx.annotation.NonNull
+import androidx.core.app.ActivityCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import printer.PrinterHelper
+import java.io.File
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "net.waytalk.didpager/printer"
     private var printerHelper: PrinterHelper? = null
 
-    init {
-        println("=== MainActivity: Constructor called ===")
-    }
+    // [추가] 외부 개발사 코드에서 가져온 권한 요청 관련 상수들
+    private val REQUEST_EXTERNAL_STORAGE = 1
+    private val PERMISSIONS_STORAGE = arrayOf(
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
 
-    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
-        super.configureFlutterEngine(flutterEngine)
-        
-        println("=== MainActivity: configureFlutterEngine START ===")
-        println("MainActivity: Flutter engine configured successfully")
-        println("MainActivity: Thread: ${Thread.currentThread().name}")
-        
-        println("MainActivity: Setting up method channel...")
-        // 2. 메서드 채널을 설정합니다.
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
-                call, result ->
-            println("MainActivity: Method call received: ${call.method}")
-            
-            // printerHelper가 초기화되었는지 확인하고 필요시 초기화
-            if (printerHelper == null) {
-                println("MainActivity: PrinterHelper not initialized, initializing now...")
-                initializePrinterHelper()
-            }
+    // [수정] configureFlutterEngine 대신 onCreate 메서드를 사용해 초기화 로직을 구성합니다.
+    // onCreate는 액티비티가 생성될 때 가장 먼저 호출되는 생명주기 메서드입니다.
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-            when (call.method) {
-                "printText" -> {
-                    val text = call.argument<String>("text")
-                    if (text != null) {
-                        println("MainActivity: Printing text: ${text.take(50)}...")
-                        val printResult = printerHelper?.printText(text) ?: "PrinterHelper not initialized"
-                        result.success(printResult)
-                    } else {
-                        result.error("INVALID_ARGUMENT", "Text to print is null.", null)
+        println("=== MainActivity: onCreate START ===")
+        // [추가] 외부 개발사 코드의 핵심 기능인 저장소 권한 확인 및 요청 로직을 실행합니다.
+        verifyStoragePermissions(this)
+        requestPermission()
+
+        // [이동] 기존 configureFlutterEngine에 있던 프린터 및 채널 설정 로직을 onCreate로 이동합니다.
+        // flutterEngine이 null이 아닌지 확인하여 안정성을 높입니다.
+        flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
+            println("MainActivity: Setting up method channel...")
+            MethodChannel(messenger, CHANNEL).setMethodCallHandler { call, result ->
+                println("MainActivity: Method call received: ${call.method}")
+
+                if (printerHelper == null) {
+                    println("MainActivity: PrinterHelper not initialized, initializing now...")
+                    initializePrinterHelper()
+                }
+
+                when (call.method) {
+                    "printText" -> {
+                        val text = call.argument<String>("text")
+                        if (text != null) {
+                            val printResult = printerHelper?.printText(text) ?: "PrinterHelper not initialized"
+                            result.success(printResult)
+                        } else {
+                            result.error("INVALID_ARGUMENT", "Text to print is null.", null)
+                        }
+                    }
+                    "printerStatus" -> {
+                        try {
+                            val status = printerHelper?.printerStatus() ?: -1
+                            println("MainActivity: Checking printer status: $status")
+                            result.success(status)
+                        } catch (e: Exception) {
+                            println("MainActivity: Error checking printer status: ${e.message}")
+                            result.error("STATUS_CHECK_FAILED", "Failed to check printer status.", e.message)
+                        }
                     }
                 }
-                "printerStatus" -> {
-                    // 2. try-catch로 네이티브 오류 발생 시 앱 중단을 방지
-                    try {
-                        val status = printerHelper?.printerStatus() ?: -1
-                        println("MainActivity: Checking printer status: $status")
-                        // 3. 순수한 상태 결과("OK", "paper no exist" 등)만 전달
-                        result.success(status)
-                    } catch (e: Exception) {
-                        println("MainActivity: Error checking printer status: ${e.message}")
-                        result.error("STATUS_CHECK_FAILED", "Failed to check printer status.", e.message)
-                    }
-                }
             }
+            println("MainActivity: Method channel setup completed")
         }
-        println("MainActivity: Method channel setup completed")
     }
-    
+
     private fun initializePrinterHelper() {
         try {
             println("MainActivity: Creating PrinterHelper instance...")
-            println("MainActivity: About to call PrinterHelper constructor...")
             printerHelper = PrinterHelper()
             println("MainActivity: PrinterHelper instance created successfully")
-            
-            // nativec 인스턴스가 제대로 생성되었는지 확인
-            println("MainActivity: Checking if printerHelper is properly initialized...")
-            
-            println("MainActivity: Attempting to open printer...")
+
             val openResult = printerHelper?.openPrinter()
             println("MainActivity: Printer open result: $openResult")
-            
-            // 프린터 열기 실패 시 재시도 로직
-            if (openResult?.contains("Failed") == true || openResult?.contains("Exception") == true) {
-                println("MainActivity: First attempt failed, retrying after 2 seconds...")
-                Thread.sleep(2000)
-                val retryResult = printerHelper?.openPrinter()
-                println("MainActivity: Printer open retry result: $retryResult")
-            }
-        } catch (e: Throwable) { // UnsatisfiedLinkError 등 모든 오류를 잡기 위해 Throwable 사용
+
+        } catch (e: Throwable) {
             println("MainActivity: CRITICAL Error during printer initialization: ${e.message}")
             e.printStackTrace()
         }
@@ -92,5 +89,28 @@ class MainActivity: FlutterActivity() {
         super.onDestroy()
         printerHelper?.closePrinter()
     }
-}
 
+    // [추가] 외부 개발사 코드에 있던 저장소 권한 확인 메서드
+    fun verifyStoragePermissions(activity: FlutterActivity) {
+        val permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                activity,
+                PERMISSIONS_STORAGE,
+                REQUEST_EXTERNAL_STORAGE
+            )
+        }
+    }
+
+    // [추가] 외부 개발사 코드에 있던 임시 폴더 생성 및 권한 요청 메서드
+    private fun requestPermission() {
+        val tempFolder = File("/sdcard/Temp")
+        if (!tempFolder.exists()) {
+            println("Temp folder does not exist. Attempting to create.")
+            val result = tempFolder.mkdir()
+            println("Folder creation result: $result")
+        } else {
+            println("Temp folder already exists.")
+        }
+    }
+}

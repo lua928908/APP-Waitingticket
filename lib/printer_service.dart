@@ -32,8 +32,9 @@ class PrinterService {
       
       // 'printText' 메소드를 호출하고, 인쇄할 텍스트를 Map 형태로 전달합니다.
       print('invokeMethod 직전@'); // 수정: printText() 호출 제거
+      // MainActivity.kt -> printText 호출
       final String? result = await _platform.invokeMethod('printText', {'text': text});
-      print('네이티브 프린트 결과: $result');
+      print('네이티브 프린트 최종 결과: $result');
 
     } on PlatformException catch (e) {
       // 네이티브 코드 호출 중 에러가 발생하면 여기서 처리합니다.
