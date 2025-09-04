@@ -9,7 +9,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Flutter 엔진이 완전히 초기화될 때까지 대기
-  print('Flutter 엔진 초기화 시작...');
+  // print('Flutter 엔진 초기화 시작...');
   
   // 앱 전체화면 모드
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -19,7 +19,7 @@ void main() {
     DeviceOrientation.landscapeRight,
   ]);
   
-  print('Flutter 앱 실행 시작...');
+  // print('Flutter 앱 실행 시작...');
   runApp(const MyApp());
 }
 
@@ -51,7 +51,7 @@ class _WebViewPageState extends State<WebViewPage> {
     super.initState();
 
     String serverUrl = 'http://192.168.0.113:8080/pos/app-waiting/appWaitingTicketMain';
-    print('서버 URL: $serverUrl');
+    // print('서버 URL: $serverUrl');
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -61,15 +61,15 @@ class _WebViewPageState extends State<WebViewPage> {
         NavigationDelegate(
           onPageStarted: (String url) {
             setState(() => _isLoading = true);
-            print('페이지 로딩 시작: $url');
+            // print('페이지 로딩 시작: $url');
           },
           onPageFinished: (String url) {
             setState(() => _isLoading = false);
-            print('페이지 로딩 완료: $url');
+            // print('페이지 로딩 완료: $url');
           },
           onWebResourceError: (WebResourceError error) {
             setState(() => _isLoading = false);
-            print('웹뷰 오류: ${error.description}');
+            // print('웹뷰 오류: ${error.description}');
           },
         ),
       )
@@ -79,7 +79,7 @@ class _WebViewPageState extends State<WebViewPage> {
         'PrintHandler',
         onMessageReceived: (JavaScriptMessage message) {
           // 웹뷰로부터 메시지를 받으면 프린터 서비스의 printText 함수를 호출합니다.
-          print('웹뷰로부터 프린트 요청 받음: ${message.message}');
+          // print('웹뷰로부터 프린트 요청 받음: ${message.message}');
           
           // 메시지가 비어있지 않은지 확인
           if (message.message.isNotEmpty) {

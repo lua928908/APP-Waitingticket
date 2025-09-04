@@ -2,6 +2,8 @@
     package="com.example.app_waitingticket">
 
     <!-- ... (권한 설정은 그대로 둡니다) ... -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name="${applicationName}"

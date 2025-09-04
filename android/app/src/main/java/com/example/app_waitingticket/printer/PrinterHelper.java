@@ -28,6 +28,7 @@ import com.thirteenrain.jyndklib.*;
 public class PrinterHelper {
 
     private jyNativeClass nativec;
+    private jyprt jpc;
     AlertDialog alertDialog;
     String Errmess="";
     int intBright=5;
@@ -57,11 +58,13 @@ public class PrinterHelper {
             // 명시적으로 jyNativeClass 클래스를 로드하여 static 블록이 실행되도록 함
             System.out.println("PrinterHelper: Loading jyNativeClass class...");
             Class.forName("com.thirteenrain.jyndklib.jyNativeClass");
+            Class.forName("com.thirteenrain.jyndklib.jyprt");
             System.out.println("PrinterHelper: jyNativeClass class loaded successfully");
             
             // 생성자에서 단 한번만 jyNativeClass 인스턴스를 생성합니다.
             // 이 시점에 jyNativeClass의 static 블록이 실행되어야 합니다.
             this.nativec = new jyNativeClass();
+            this.jpc = new jyprt();
             System.out.println("PrinterHelper: jyNativeClass instance created successfully.");
         } catch (ClassNotFoundException e) {
             System.err.println("PrinterHelper CRITICAL: jyNativeClass class not found!");
@@ -111,11 +114,9 @@ public class PrinterHelper {
 
         // nativec가 null인지 확인
         if (nativec == null) {
-            System.out.println("PrinterHelper > printerStatus: nativec is null!");
+            System.out.println("PrinterHelper > printerStatus: nativec가 null 입니다.");
             return -1;
         }
-
-        System.out.println("PrinterHelper > printerStatus: nativec is not null, proceeding...");
 
         int overheatCheck=0;
         int coverCheck = 0;
@@ -182,7 +183,7 @@ public class PrinterHelper {
         if (nativec != null) {
             try {
                 nativec.jyPrinterClose();
-                System.out.println("PrinterHelper: Printer closed successfully");
+                System.out.println("PrinterHelper: 프린터 닫기 성공");
             } catch (Exception e) {
                 System.out.println("PrinterHelper: Exception in closePrinter(): " + e.getMessage());
             }
@@ -220,43 +221,43 @@ public class PrinterHelper {
     public String printTest(String text){
         try{
             System.out.println("printTest 메서드 실행");
-            jyprt jpc = new jyprt();
-            jyNativeClass nativec = new jyNativeClass();
+            // jyprt jpc = new jyprt();
+            // jyNativeClass nativec = new jyNativeClass();
             String cmd = "";
 
             // 1. 프린터 초기화
-            cmd += jpc.Esc_Initialize();
+            cmd += this.jpc.Esc_Initialize();
 
             // 2. 밝기 설정
-            cmd += jpc.FS_Print_Bright((char)intBright);
+            cmd += this.jpc.FS_Print_Bright((char)intBright);
 
             // 3. 문자 크기 설정 및 텍스트 출력
-            cmd += jpc.GS_SelectCharaterSize((char)0x11); // 48*48 크기
+            cmd += this.jpc.GS_SelectCharaterSize((char)0x11); // 48*48 크기
             cmd += "   <제이와이컴퍼니>\n";
 
-            cmd += jpc.GS_SelectCharaterSize((char)0x0); // 12*24 크기
+            cmd += this.jpc.GS_SelectCharaterSize((char)0x0); // 12*24 크기
             cmd += "1234567890 가나다라마바사아자차카타파하 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz\n";
 
             // 4. 밑줄 효과
-            cmd += jpc.Esc_Underline((char)0x1); // 밑줄 on
+            cmd += this.jpc.Esc_Underline((char)0x1); // 밑줄 on
             cmd += "텍스트 내용";
-            cmd += jpc.Esc_Underline((char)0x0); // 밑줄 off
+            cmd += this.jpc.Esc_Underline((char)0x0); // 밑줄 off
 
             // 5. 반전 효과
-            cmd += jpc.GS_TurnsWhiteBlack((char)1); // 반전 on
+            cmd += this.jpc.GS_TurnsWhiteBlack((char)1); // 반전 on
             cmd += "반전 텍스트";
-            cmd += jpc.GS_TurnsWhiteBlack((char)0); // 반전 off
+            cmd += this.jpc.GS_TurnsWhiteBlack((char)0); // 반전 off
 
             // 6. 용지 이송 및 절단
             cmd += "\n\n\n\n";
-            cmd += jpc.Control_FormFeed();
-            cmd += jpc.GS_CutPaper((char)0);
+            cmd += this.jpc.Control_FormFeed();
+            cmd += this.jpc.GS_CutPaper((char)0);
 
             // 7. 출력 실행
             try {
-                System.out.println("프린터 출력 실행@");
-                nativec.jyPrintString(jpc.Esc_Initialize().getBytes("euc-kr"), printsync);
-                nativec.jyPrintString(cmd.getBytes("euc-kr"), printsync);
+                System.out.println("실제 프린터 출력 실행@");
+                this.nativec.jyPrintString(this.jpc.Esc_Initialize().getBytes("euc-kr"), printsync);
+                this.nativec.jyPrintString(cmd.getBytes("euc-kr"), printsync);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
