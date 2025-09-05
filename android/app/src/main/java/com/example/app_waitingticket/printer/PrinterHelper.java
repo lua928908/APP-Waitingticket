@@ -1,8 +1,7 @@
 package com.example.app_waitingticket.printer;
 
-import java.io.UnsupportedEncodingException;
-import com.thirteenrain.jyndklib.jyprt;
 import com.thirteenrain.jyndklib.jyNativeClass;
+import com.thirteenrain.jyndklib.jyprt;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,96 +12,105 @@ import com.example.app_waitingticket.printer.fixedPrint.KovanPrintUtils;
 import com.example.app_waitingticket.printer.fixedPrint.KovanReceiptBuilder;
 import com.example.app_waitingticket.printer.fixedPrint.KovanReceiptVo;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+
 public class PrinterHelper {
 
+    private static PrinterHelper instance;
     private jyNativeClass nativec;
     private jyprt jpc;
     private boolean isPrinterOpen = false;
-    private final int printsync = 1;
     boolean CThreadSwitch;
 
-    public PrinterHelper() {
-        System.out.println("PrinterHelper: Constructor called. Initializing objects...");
+    private PrinterHelper() {
+        System.out.println("PrinterHelper: Singleton instance created. Initializing...");
         try {
-            // [수정] 생성자에서 객체를 단 한번만 안정적으로 생성합니다.
             this.nativec = new jyNativeClass();
             this.jpc = new jyprt();
-            System.out.println("PrinterHelper: Native objects initialized successfully.");
-            // 생성자에서 바로 프린터를 엽니다.
+            System.out.println("PrinterHelper: Native objects initialized.");
+
             openPrinter();
         } catch (Exception e) {
             System.err.println("PrinterHelper CRITICAL: Initialization failed.");
             e.printStackTrace();
-            throw new RuntimeException(e);
         }
     }
 
+    public static synchronized PrinterHelper getInstance() {
+        if (instance == null) {
+            instance = new PrinterHelper();
+        }
+        return instance;
+    }
+
     private void openPrinter() {
-        if (isPrinterOpen) return;
-        try {
-            if (nativec != null && nativec.jyPrinterOpen() == 0) {
-                isPrinterOpen = true;
-                System.out.println("PrinterHelper: Printer opened successfully.");
-            } else {
-                isPrinterOpen = false;
-                System.err.println("PrinterHelper: Failed to open printer.");
-            }
-        } catch (Exception e) {
+        if (isPrinterOpen || nativec == null) return;
+
+        if (nativec.jyPrinterOpen() == 0) {
+            isPrinterOpen = true;
+            System.out.println("PrinterHelper: Printer opened successfully.");
+        } else {
             isPrinterOpen = false;
-            System.err.println("PrinterHelper: Exception while opening printer.");
-            e.printStackTrace();
+            System.err.println("PrinterHelper: Failed to open printer.");
+        }
+    }
+
+    public void closePrinter() {
+        if (isPrinterOpen && nativec != null) {
+            System.out.println("PrinterHelper: Closing printer...");
+            nativec.jyPrinterClose();
+            isPrinterOpen = false;
         }
     }
 
     public int printerStatus() {
-        if (!isPrinterOpen) return -1;
+        if (!isPrinterOpen) {
+            System.err.println("Status check failed: Printer is not open.");
+            return -1;
+        }
         try {
-            if (nativec.jyPrinter_PaperCheck() != 0) return -1;
-            if (nativec.jyPrinter_CoverCheck() != 0) return -1;
-            if (nativec.jyPrinter_OverheatCheck() != 0) return -1;
-            return 0;
+            if (nativec.jyPrinter_PaperCheck() != 0) return -2;
+            if (nativec.jyPrinter_CoverCheck() != 0) return -3;
+            if (nativec.jyPrinter_OverheatCheck() != 0) return -4;
+            return 0; // 정상
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
         }
     }
 
-    public void closePrinter() {
-        if (isPrinterOpen && nativec != null) {
-            nativec.jyPrinterClose();
-            isPrinterOpen = false;
-            System.out.println("PrinterHelper: Printer closed.");
+    public String printSimpleTest(String text) {
+        System.out.println("PrinterHelper: printSimpleTest() called.");
+        if (!isPrinterOpen) {
+            System.err.println("Print failed: Printer is not open.");
+            return "Print Failed: Printer not open";
+        }
+
+        try {
+            nativec.jyPrintString(jpc.FS_Print_Bright((char) 8).getBytes("CP949"), 0);
+            nativec.jyPrintString(jpc.Esc_Initialize().getBytes("CP949"), 0);
+            nativec.jyPrintString(text.getBytes("CP949"), 0);
+            nativec.jyPrintString("\n\n\n".getBytes("CP949"), 0);
+            // nativec.jyPrintString(jpc.GS_CutPaper((char) 0).getBytes("CP949"), 0);
+
+            System.out.println("PrinterHelper: Print command sent.");
+            return "Print Success";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Print Failed: " + e.getMessage();
         }
     }
 
-    // public String printText(String text) {
-    //     if (!isPrinterOpen) {
-    //         System.err.println("Print command ignored: Printer is not open.");
-    //         return "Print Failed: Printer not open.";
-    //     }
-    //     try {
-    //         System.out.println("PrinterHelper: Preparing to print text.");
-    //
-    //         // 가장 단순하고 확실한 명령어 조합 사용
-    //         String initCmd = jpc.Esc_Initialize();
-    //         String contentCmd = text;
-    //         String cutCmd = "\n\n\n\n" + jpc.GS_CutPaper((char) 0);
-    //
-    //         nativec.jyPrintString(initCmd.getBytes("euc-kr"), printsync);
-    //         nativec.jyPrintString(contentCmd.getBytes("euc-kr"), printsync);
-    //         nativec.jyPrintString(cutCmd.getBytes("euc-kr"), printsync);
-    //
-    //         System.out.println("PrinterHelper: Print commands sent to native layer.");
-    //         return "Print Success";
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //         return "Print Failed: " + e.getMessage();
-    //     }
-    // }
-
     public String printText(String text){
         JSONArray bbbb = new JSONArray();   // 메뉴 리스트
-        //List<JSONObject> bbbb = new ArrayList<>();   // 메뉴 리스트
 
         JSONArray bbbbdtail = new JSONArray();
         JSONObject brrrrdtail = new JSONObject();
@@ -125,7 +133,6 @@ public class PrinterHelper {
             throw new RuntimeException(e);
         }
         bbbb.put(brrrr);
-        //bbbb.add(brrrr);
 
         JSONArray bbbbdtail1 = new JSONArray();
         JSONObject brrrrdtail1 = new JSONObject();
@@ -207,35 +214,57 @@ public class PrinterHelper {
         }
     }
 
-    public String printSimpleTest() {
+    public String printBasedOnDocs() {
+        System.out.println("PrinterHelper: 문서 기반 테스트 시작...");
+        if (!isPrinterOpen) {
+            System.err.println("Print failed: Printer is not open.");
+            return "Print Failed: Printer not open";
+        }
+
         try {
-            System.out.println("PrinterHelper: printSimpleTest() 실행");
+            final int SYNC_MODE = 1;
 
-            jyNativeClass nativec = new jyNativeClass();
-            jyprt jpc = new jyprt();
+            this.nativec.jyPrintString(this.jpc.Esc_Initialize().getBytes("CP949"), SYNC_MODE);
+            this.nativec.jyPrintString(this.jpc.FS_Print_Bright((char)8).getBytes("CP949"), SYNC_MODE); // 농도 설정
+            this.nativec.jyPrintString(this.jpc.Esc_SelectJust((char)0x01).getBytes("CP949"), SYNC_MODE); // 가운데 정렬
 
-            // 프린터 열기
-            int openResult = nativec.jyPrinterOpen();
-            if (openResult != 0) {
-                System.err.println("PrinterHelper: Failed to open printer. Result: " + openResult);
-                return "Print Failed: Cannot open printer";
-            }
+            String testContent = "문서 기반 테스트\n";
+            testContent += "Printer Test based on Docs\n";
+            testContent += "1234567890\n";
+            this.nativec.jyPrintString(testContent.getBytes("CP949"), SYNC_MODE);
 
-            // 아주 단순한 출력 테스트 (제조사 예제처럼)
-            nativec.jyPrintString(jpc.Esc_Initialize().getBytes("euc-kr"), 0);
-            nativec.jyPrintString("=== PRINT TEST START ===\n".getBytes("euc-kr"), 0);
-            nativec.jyPrintString("안녕하세요, 프린터 테스트입니다.\n".getBytes("euc-kr"), 0);
-            nativec.jyPrintString("1234567890\n\n\n".getBytes("euc-kr"), 0);
-            nativec.jyPrintString(jpc.Control_FormFeed().getBytes("euc-kr"),0); // 안되면 주석 해보기
-            // nativec.jyPrintString(jpc.GS_CutPaper((char) 0).getBytes("euc-kr"), 0);
+            this.nativec.jyPrintString("\n\n\n\n".getBytes("CP949"), SYNC_MODE); // 충분한 여백
+            // this.nativec.jyPrintString(this.jpc.GS_CutPaper((char)0).getBytes("CP949"), SYNC_MODE);
 
+            System.out.println("PrinterHelper: 문서 기반 테스트 명령 전송 완료.");
+            return "Print Success (Based on Docs)";
 
-            System.out.println("PrinterHelper: printTest() 완료");
-            return "Print Success";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Print Failed: " + e.getMessage();
+        }
+    }
+
+    public String printPureTextTest() {
+        System.out.println("PrinterHelper: 순수 텍스트 전송 테스트 시작...");
+        if (!isPrinterOpen) {
+            return "Print Failed: Printer is not open";
+        }
+
+        try {
+            final int SYNC_MODE = 1;
+            String text = "Is this text printed?\n안녕하세요.\n\n\n";
+
+            this.nativec.jyPrintString(text.getBytes("CP949"), SYNC_MODE);
+
+            this.nativec.jyPrintString(this.jpc.GS_CutPaper((char)0).getBytes("CP949"), SYNC_MODE);
+
+            System.out.println("PrinterHelper: 순수 텍스트 명령 전송 완료.");
+            return "Print Success (Pure Text Test)";
+
         } catch (Exception e) {
             e.printStackTrace();
             return "Print Failed: " + e.getMessage();
         }
     }
 }
-

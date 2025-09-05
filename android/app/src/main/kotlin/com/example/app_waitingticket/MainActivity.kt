@@ -37,7 +37,7 @@ class MainActivity: FlutterActivity() {
                     // [핵심 수정] 프린터 관련 작업이 필요할 때마다 PrinterHelper를 새로 생성합니다.
                     // 이것이 Factory Test의 동작 방식을 가장 정확하게 모방하는 방법입니다.
                     if (printerHelper == null) {
-                        printerHelper = PrinterHelper()
+                        printerHelper = PrinterHelper.getInstance()
                     }
 
                     when (call.method) {
@@ -58,7 +58,10 @@ class MainActivity: FlutterActivity() {
                         }
                         "printTest" -> {
                             println("MainActivity: printTest called on UI thread.")
-                            val printResult = printerHelper?.printSimpleTest() ?: "PrinterHelper is null."
+                            val text = call.argument<String>("text")
+//                            val printResult = printerHelper?.printSimpleTest("출력하기") ?: "PrinterHelper is null."
+//                            val printResult = printerHelper?.printBasedOnDocs() ?: "PrinterHelper is null."
+                            val printResult = printerHelper?.printPureTextTest() ?: "PrinterHelper is null."
                             result.success(printResult)
                         }
                     }
