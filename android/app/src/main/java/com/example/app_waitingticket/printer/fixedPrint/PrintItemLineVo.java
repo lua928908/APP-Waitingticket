@@ -1,0 +1,44 @@
+package com.example.app_waitingticket.printer.fixedPrint;
+
+import java.util.ArrayList;
+
+import androidx.annotation.NonNull;
+
+public class PrintItemLineVo {
+    private ArrayList<com.example.app_waitingticket.printer.fixedKichenPrint.KovanPrintDefine.PRINT_OPTION> options;
+    private KovanPrintDefine.PRINT_KEY key;
+    private String value;
+
+    protected PrintItemLineVo() {
+    }
+
+    protected PrintItemLineVo(ArrayList<com.example.app_waitingticket.printer.fixedKichenPrint.KovanPrintDefine.PRINT_OPTION> options, @NonNull KovanPrintDefine.PRINT_KEY key, String value) {
+        this.options = options;
+        this.key = key;
+        this.value = value;
+    }
+
+    protected ArrayList<com.example.app_waitingticket.printer.fixedKichenPrint.KovanPrintDefine.PRINT_OPTION> getOptions() {
+        return options;
+    }
+
+    protected void setOptions(ArrayList<com.example.app_waitingticket.printer.fixedKichenPrint.KovanPrintDefine.PRINT_OPTION> options) {
+        this.options = options;
+    }
+
+    protected KovanPrintDefine.PRINT_KEY getKey() {
+        return key;
+    }
+
+    protected void setKey(KovanPrintDefine.PRINT_KEY key) {
+        this.key = key;
+    }
+
+    protected String getValue() {
+        return value;
+    }
+
+    protected void setValue(String value) {
+        this.value = value;
+    }
+}

@@ -1,6 +1,6 @@
 package com.thirteenrain.jyndklib;
-
 import java.io.UnsupportedEncodingException;
+
 public class jyprt {
 
     public String StartOfText(){

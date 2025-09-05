@@ -1,28 +1,20 @@
 package com.thirteenrain.jyndklib;
 
+//import java.io.FileDescriptor;
+
 import java.io.FileDescriptor;
 
 public class jyNativeClass {
     static {
-        System.out.println("JNI_DEBUG: jyNativeClass static block START");
-        try {
-            System.out.println("JNI_DEBUG: Attempting to load libjyndklib.so...");
-            System.out.println("JNI_DEBUG: Current library path: " + System.getProperty("java.library.path"));
-            System.loadLibrary("jyndklib");
-            System.out.println("JNI_DEBUG: libjyndklib.so loaded successfully!");
-        } catch (UnsatisfiedLinkError e) {
-            System.err.println("JNI_DEBUG: CRITICAL - Failed to load libjyndklib.so!");
-            System.err.println("JNI_DEBUG: Error details: " + e.getMessage());
-            e.printStackTrace();
-        }
-        System.out.println("JNI_DEBUG: jyNativeClass static block END");
+        System.loadLibrary("jyndklib");							//apk install
+        //System.load("/system/lib/libjyndklib.so");		//system app
     }
 
     public native int jyUart_WriteByte(int hDevice,String bByte);
     public native int jyUart_ReadByte();
     public native String jyUart_readDataSend();
 
-    // public static native FileDescriptor jyUart_Open(String path, int baudrate, int flags);
+   // public static native FileDescriptor jyUart_Open(String path, int baudrate, int flags);
     //public native void jyUart_close(FileDescriptor mfd);
 
 
@@ -37,7 +29,7 @@ public class jyNativeClass {
     public native int jyPrintString(byte[] string, int sync); /// Use String to byteArray
     public native int jyPrinterFeed(int printer_fd, int dwDirection);
     public native int jyPrinterRawData(byte[] pByte);
-    //    public native int jyPrinterRawData2D(byte[] pByte,int count);
+//    public native int jyPrinterRawData2D(byte[] pByte,int count);
 //    public native void jyPrinterSendRawData2D(byte[] pByte,int count);
     public native int jyPrinterSensor();
 

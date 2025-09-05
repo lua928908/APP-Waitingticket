@@ -67,5 +67,11 @@ flutter {
     source = "../.."
 }
 
-dependencies {}
+dependencies {
+    implementation("androidx.appcompat:appcompat:1.2.0")
+    implementation("com.google.android.material:material:1.3.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.0.4")
+    implementation("com.journeyapps:zxing-android-embedded:3.6.0")
+    implementation("com.google.code.gson:gson:2.8.5")
+}
 
