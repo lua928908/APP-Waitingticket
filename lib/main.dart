@@ -103,16 +103,6 @@ class _WebViewPageState extends State<WebViewPage> {
                   child: const Icon(Icons.refresh, color: Colors.white),
                 ),
                 const SizedBox(height: 12),
-                // 프린터 테스트 버튼
-                ElevatedButton(
-                  onPressed: () async {
-                    await _printerService.printTest();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                  ),
-                  child: const Text("프린터 테스트"),
-                ),
               ],
             ),
           ),

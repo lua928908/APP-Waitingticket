@@ -71,44 +71,6 @@ public class PrinterHelper {
         }
     }
 
-    public int printerStatus() {
-        if (!isPrinterOpen) {
-            System.err.println("Status check failed: Printer is not open.");
-            return -1;
-        }
-        try {
-            if (nativec.jyPrinter_PaperCheck() != 0) return -2;
-            if (nativec.jyPrinter_CoverCheck() != 0) return -3;
-            if (nativec.jyPrinter_OverheatCheck() != 0) return -4;
-            return 0; // 정상
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-
-    public String printSimpleTest(String text) {
-        System.out.println("PrinterHelper: printSimpleTest() called.");
-        if (!isPrinterOpen) {
-            System.err.println("Print failed: Printer is not open.");
-            return "Print Failed: Printer not open";
-        }
-
-        try {
-            nativec.jyPrintString(jpc.FS_Print_Bright((char) 8).getBytes("CP949"), 0);
-            nativec.jyPrintString(jpc.Esc_Initialize().getBytes("CP949"), 0);
-            nativec.jyPrintString(text.getBytes("CP949"), 0);
-            nativec.jyPrintString("\n\n\n".getBytes("CP949"), 0);
-            // nativec.jyPrintString(jpc.GS_CutPaper((char) 0).getBytes("CP949"), 0);
-
-            System.out.println("PrinterHelper: Print command sent.");
-            return "Print Success";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Print Failed: " + e.getMessage();
-        }
-    }
-
     public String printText(String text){
         System.out.println("샘플과 유사한 코드 printText 실행@");
         JSONArray bbbb = new JSONArray();   // 메뉴 리스트
@@ -212,60 +174,6 @@ public class PrinterHelper {
         } catch (java.lang.Exception e) {
             e.printStackTrace();
             return "Print Failure Exception";
-        }
-    }
-
-    public String printBasedOnDocs() {
-        System.out.println("PrinterHelper: 문서 기반 테스트 시작...");
-        if (!isPrinterOpen) {
-            System.err.println("Print failed: Printer is not open.");
-            return "Print Failed: Printer not open";
-        }
-
-        try {
-            final int SYNC_MODE = 1;
-
-            this.nativec.jyPrintString(this.jpc.Esc_Initialize().getBytes("CP949"), SYNC_MODE);
-            this.nativec.jyPrintString(this.jpc.FS_Print_Bright((char)8).getBytes("CP949"), SYNC_MODE); // 농도 설정
-            this.nativec.jyPrintString(this.jpc.Esc_SelectJust((char)0x01).getBytes("CP949"), SYNC_MODE); // 가운데 정렬
-
-            String testContent = "문서 기반 테스트\n";
-            testContent += "Printer Test based on Docs\n";
-            testContent += "1234567890\n";
-            this.nativec.jyPrintString(testContent.getBytes("CP949"), SYNC_MODE);
-
-            this.nativec.jyPrintString("\n\n\n\n".getBytes("CP949"), SYNC_MODE); // 충분한 여백
-            // this.nativec.jyPrintString(this.jpc.GS_CutPaper((char)0).getBytes("CP949"), SYNC_MODE);
-
-            System.out.println("PrinterHelper: 문서 기반 테스트 명령 전송 완료.");
-            return "Print Success (Based on Docs)";
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Print Failed: " + e.getMessage();
-        }
-    }
-
-    public String printPureTextTest() {
-        System.out.println("PrinterHelper: 순수 텍스트 전송 테스트 시작...");
-        if (!isPrinterOpen) {
-            return "Print Failed: Printer is not open";
-        }
-
-        try {
-            final int SYNC_MODE = 1;
-            String text = "Is this text printed?\n안녕하세요.\n\n\n";
-
-            this.nativec.jyPrintString(text.getBytes("CP949"), SYNC_MODE);
-
-            this.nativec.jyPrintString(this.jpc.GS_CutPaper((char)0).getBytes("CP949"), SYNC_MODE);
-
-            System.out.println("PrinterHelper: 순수 텍스트 명령 전송 완료.");
-            return "Print Success (Pure Text Test)";
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Print Failed: " + e.getMessage();
         }
     }
 }

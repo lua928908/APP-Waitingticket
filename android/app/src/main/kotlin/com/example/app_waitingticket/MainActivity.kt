@@ -51,19 +51,6 @@ class MainActivity: FlutterActivity() {
                                 result.error("INVALID_ARGUMENT", "Text to print is null.", null)
                             }
                         }
-                        "printerStatus" -> {
-                            println("MainActivity: printerStatus called on UI thread.")
-                            val status = printerHelper?.printerStatus() ?: -1
-                            result.success(status)
-                        }
-                        "printTest" -> {
-                            println("MainActivity: printTest called on UI thread.")
-                            val text = call.argument<String>("text")
-//                            val printResult = printerHelper?.printSimpleTest("출력하기") ?: "PrinterHelper is null."
-//                            val printResult = printerHelper?.printBasedOnDocs() ?: "PrinterHelper is null."
-                            val printResult = printerHelper?.printPureTextTest() ?: "PrinterHelper is null."
-                            result.success(printResult)
-                        }
                     }
                 }
             }
