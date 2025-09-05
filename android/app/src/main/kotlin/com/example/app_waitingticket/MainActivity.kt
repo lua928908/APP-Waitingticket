@@ -56,6 +56,11 @@ class MainActivity: FlutterActivity() {
                             val status = printerHelper?.printerStatus() ?: -1
                             result.success(status)
                         }
+                        "printTest" -> {
+                            println("MainActivity: printTest called on UI thread.")
+                            val printResult = printerHelper?.printSimpleTest() ?: "PrinterHelper is null."
+                            result.success(printResult)
+                        }
                     }
                 }
             }

@@ -48,5 +48,15 @@ class PrinterService {
       print("프린터 서비스: 에러 상세: ${e.details}");
     }
   }
+
+  Future<void> printTest() async {
+    try {
+      print('PrinterService: printTest() 호출');
+      final String? result = await _platform.invokeMethod('printTest');
+      print("프린트 테스트 결과: $result");
+    } on PlatformException catch (e) {
+      print("프린트 테스트 실패: ${e.message}");
+    }
+  }
 }
 

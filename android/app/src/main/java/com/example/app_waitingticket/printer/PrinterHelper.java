@@ -206,5 +206,36 @@ public class PrinterHelper {
             return "Print Failure Exception";
         }
     }
+
+    public String printSimpleTest() {
+        try {
+            System.out.println("PrinterHelper: printSimpleTest() 실행");
+
+            jyNativeClass nativec = new jyNativeClass();
+            jyprt jpc = new jyprt();
+
+            // 프린터 열기
+            int openResult = nativec.jyPrinterOpen();
+            if (openResult != 0) {
+                System.err.println("PrinterHelper: Failed to open printer. Result: " + openResult);
+                return "Print Failed: Cannot open printer";
+            }
+
+            // 아주 단순한 출력 테스트 (제조사 예제처럼)
+            nativec.jyPrintString(jpc.Esc_Initialize().getBytes("euc-kr"), 0);
+            nativec.jyPrintString("=== PRINT TEST START ===\n".getBytes("euc-kr"), 0);
+            nativec.jyPrintString("안녕하세요, 프린터 테스트입니다.\n".getBytes("euc-kr"), 0);
+            nativec.jyPrintString("1234567890\n\n\n".getBytes("euc-kr"), 0);
+            nativec.jyPrintString(jpc.Control_FormFeed().getBytes("euc-kr"),0); // 안되면 주석 해보기
+            // nativec.jyPrintString(jpc.GS_CutPaper((char) 0).getBytes("euc-kr"), 0);
+
+
+            System.out.println("PrinterHelper: printTest() 완료");
+            return "Print Success";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Print Failed: " + e.getMessage();
+        }
+    }
 }
 
