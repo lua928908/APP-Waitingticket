@@ -46,6 +46,10 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = 1
         versionName = "1.0"
+
+        ndk {
+            abiFilters.add("armeabi-v7a")
+        }
     }
 
     buildTypes {

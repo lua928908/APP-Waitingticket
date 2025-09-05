@@ -110,6 +110,7 @@ public class PrinterHelper {
     }
 
     public String printText(String text){
+        System.out.println("샘플과 유사한 코드 printText 실행@");
         JSONArray bbbb = new JSONArray();   // 메뉴 리스트
 
         JSONArray bbbbdtail = new JSONArray();
